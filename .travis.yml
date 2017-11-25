@@ -1,5 +1,15 @@
+sudo: false
 language: python
-python: 3.6
+python:
+ - "2.6"
+ - "2.7"
+ - "3.3"
+ - "3.4"
+ - "3.5"
+ - "3.6"
+ - "pypy"
+ - "pypy3"
+ - "3.7-dev"
 
 cache:
   pip: true
@@ -8,28 +18,13 @@ cache:
 
 before_install:
   - pip install codecov
-  - cd $HOME
-  - mkdir -p bin
-  - export PATH=$HOME/bin:$PATH
-  - "if [[ $TOXENV == 'pypy3' ]]; then deactivate && wget https://bitbucket.org/squeaky/portable-pypy/downloads/pypy3.5-5.7.1-beta-linux_x86_64-portable.tar.bz2 && tar -jxvf pypy3.5-5.7.1-beta-linux_x86_64-portable.tar.bz2 && echo 'Setting up aliases...' && export PATH=$HOME/pypy3.5-5.7.1-beta-linux_x86_64-portable/bin/:$PATH && ln -s ~/pypy3.5-5.7.1-beta-linux_x86_64-portable/bin/pypy3.3 ~/bin/python && echo 'Setting up pip...' && pypy3.5-5.7.1-beta-linux_x86_64-portable/bin/pypy -m ensurepip && ln -s ~/pypy3.5-5.7.1-beta-linux_x86_64-portable/bin/pip3.3 ~/bin/pip ; fi"
-  - cd $TRAVIS_BUILD_DIR
-
-env:
-  - TOXENV=py26
-  - TOXENV=py27
-  - TOXENV=py33
-  - TOXENV=py34
-  - TOXENV=py35
-  - TOXENV=py36
-  - TOXENV=pypy
-  - TOXENV=pypy3
-  - TOXENV=pep8
+  - pip install tox-travis
 
 install:
     - pip install -r requirements_dev.txt
 
 script:
-  - tox --skip-missing-interpreters -e $TOXENV
+  - tox --skip-missing-interpreters
 
 after_success:
   - codecov
@@ -47,4 +42,4 @@ deploy:
   on:
     branch: master
     tags: true
-    condition: "$TOXENV = py27"
+    condition: $TRAVIS_PYTHON_VERSION = "2.7"
