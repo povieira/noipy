@@ -1,30 +1,24 @@
 language: python
-python: 3.6
-
-cache:
-  pip: true
-  directories:
-    - .tox
+python:
+  - "2.6"
+  - "2.7"
+  - "3.3"
+  - "3.4"
+  - "3.5"
+  - "3.6"
+  - "3.7-dev"  # 3.7 development branch
+  - "pypy"
+  - "pyp3"
 
 env:
   global:
     - CC_TEST_REPORTER_ID=9a56dc1cdb8135a0d7dbbce6eab3979f2bb562d7071bc323be4fc64e838cf635
-  matrix:
-    - TOXENV=py26
-    - TOXENV=py27
-    - TOXENV=py33
-    - TOXENV=py34
-    - TOXENV=py35
-    - TOXENV=py36
-    - TOXENV=pypy
-    - TOXENV=pypy3
-    - TOXENV=pep8
 
 before_install:
   - pip install codecov
 
 install:
-    - pip install -r requirements-dev.txt
+    - pip install -r requirements-dev.txt tox-travis
 
 before_script:
   - curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
@@ -32,7 +26,7 @@ before_script:
   - ./cc-test-reporter before-build
 
 script:
-  - tox --skip-missing-interpreters -e $TOXENV
+  - tox --skip-missing-interpreters
 
 after_script:
   - ./cc-test-reporter after-build --exit-code $TRAVIS_TEST_RESULT
@@ -40,16 +34,30 @@ after_script:
 after_success:
   - codecov
 
+jobs:
+  include:
+    - stage: pep8
+      python: "3.6"
+      script: tox -e pep8
+    - stage: coverage
+      python: "3.6"
+      install:
+        - pip install codecov
+      script: codecov
+    - stage: deploy
+      script:
+        - |
+          [ -z $TRAVIS_TAG ] && [ $TRAVIS_PYTHON_VERSION = "py27" ] && echo "Deploying to PyPI" || echo "Not yet... (tag=$TRAVIS_TAG, $TRAVIS_PYTHON_VERSION)"
+      deploy:
+        provider: pypi
+        distributions: "sdist bdist_wheel"
+        user: "pv8"
+        password:
+          secure: "L7o85k5LaAC88lo9lfpHo4GA42kurgXXtZ2A4cgS/cQqleROjq36x9IEpAkqFwgQBcL1Aj3j11760EwYBv2j5Auf2OqwENIOLfYiW5YiKu9gCt3Xkh+UceAj/CrH3aRM/hwNwePmCY6x9iPtaY8aR0PEuVzaE2lPLIIllhPPQJg="
+        on:
+          branch: master
+          tags: true
+          condition: "$TRAVIS_PYTHON_VERSION = py27"
+
 notifications:
   email: false
-
-deploy:
-  provider: pypi
-  distributions: "sdist bdist_wheel"
-  user: "pv8"
-  password:
-    secure: "L7o85k5LaAC88lo9lfpHo4GA42kurgXXtZ2A4cgS/cQqleROjq36x9IEpAkqFwgQBcL1Aj3j11760EwYBv2j5Auf2OqwENIOLfYiW5YiKu9gCt3Xkh+UceAj/CrH3aRM/hwNwePmCY6x9iPtaY8aR0PEuVzaE2lPLIIllhPPQJg="
-  on:
-    branch: master
-    tags: true
-    condition: "$TOXENV = py27"

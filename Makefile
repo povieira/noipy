@@ -1,22 +1,26 @@
-VERSION := $(shell python -c "import noipy; print 'v%s' % noipy.__version__")
+VERSION := $(shell python -c "from __future__ import print_function; import noipy; print('v%s' % noipy.__version__)")
 
 .PHONY: all
-all: clean tests dist
+all: clean test dist
 	@echo "=> All set up."
 	@echo "=> execute *make publish* to upload to PyPI repository."
+
+init:
+	@echo "=> Installing dev dependencies"
+	pip install -r requirements-dev.txt
 
 dist: clean
 	@echo "=> Building packages"
 	python setup.py sdist bdist_wheel
 
-devdeps:
-	@echo "=> Installing dev dependencies"
-	pip install -r requirements_dev.txt
-
-.PHONY: tests
-tests: devdeps
+.PHONY: test
+test: init
 	@echo "=> Running tests"
-	tox
+	tox --skip-missing-interpreters
+
+pep8:
+	@echo "=> Running pep8"
+	tox --skip-missing-interpreters -e pep8
 
 .PHONY: clean
 clean:
