@@ -45,6 +45,7 @@ jobs:
         - pip install codecov
       script: codecov
     - stage: deploy
+      python: "3.6"
       script:
         - |
           [ -z $TRAVIS_TAG ] && [ $TRAVIS_PYTHON_VERSION = "py27" ] && echo "Deploying to PyPI" || echo "Not yet... (tag=$TRAVIS_TAG, $TRAVIS_PYTHON_VERSION)"
