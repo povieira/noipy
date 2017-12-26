@@ -58,6 +58,9 @@ jobs:
           branch: master
           tags: true
           condition: "$TRAVIS_PYTHON_VERSION = py27"
+  allow_failures:
+    - python: "3.7-dev"
+    - python: "pypy3"  # due to error on travis pypy3 installation
 
 notifications:
   email: false
