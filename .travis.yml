@@ -25,6 +25,7 @@ before_script:
   - curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
   - chmod +x ./cc-test-reporter
   - ./cc-test-reporter before-build
+  - env
 
 script:
   - tox --skip-missing-interpreters
@@ -40,12 +41,12 @@ jobs:
   include:
     - stage: pep8
       python: "3.6"
-      script: tox -e pep8
+      env: TOXENV=pep8
     - stage: deploy
-      python: "3.6"
+      python: "2.7"
       script:
         - |
-          [ -z $TRAVIS_TAG ] && [ $TRAVIS_PYTHON_VERSION = "py27" ] && echo "Deploying to PyPI" || echo "Not yet... (tag=$TRAVIS_TAG, $TRAVIS_PYTHON_VERSION)"
+          [ -z $TRAVIS_TAG ] && [ $TRAVIS_PYTHON_VERSION = "py27" ] && echo "=== Publishing to PyPI" || echo "=== Skipping publishing (tag=$TRAVIS_TAG, $TRAVIS_PYTHON_VERSION)"
       deploy:
         provider: pypi
         distributions: "sdist bdist_wheel"
