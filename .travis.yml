@@ -8,7 +8,7 @@ python:
   - "3.6"
   - "3.7-dev"  # 3.7 development branch
   - "pypy"
-  - "pyp3"
+  - "pypy3"
 
 env:
   global:
@@ -21,6 +21,7 @@ install:
     - pip install -r requirements-dev.txt tox-travis
 
 before_script:
+  - coverage erase
   - curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
   - chmod +x ./cc-test-reporter
   - ./cc-test-reporter before-build
@@ -35,15 +36,11 @@ after_success:
   - codecov
 
 jobs:
+  fast_finish: true
   include:
     - stage: pep8
       python: "3.6"
       script: tox -e pep8
-    - stage: coverage
-      python: "3.6"
-      install:
-        - pip install codecov
-      script: codecov
     - stage: deploy
       python: "3.6"
       script:
@@ -60,8 +57,7 @@ jobs:
           tags: true
           condition: "$TRAVIS_PYTHON_VERSION = py27"
   allow_failures:
-    - python: "3.7-dev"
-    - python: "pypy3"  # due to error on travis pypy3 installation
+      python: "pypy3"  # due to error on travis pypy3 installation
 
 notifications:
   email: false
